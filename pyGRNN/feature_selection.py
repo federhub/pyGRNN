@@ -410,8 +410,8 @@ class Anisotropic_selector():
         A class to perform supervised feature selection using Ansotropic
         GRNN. 
     """
-        
-    def bfe(self, X, y, feature_names, strategy = 'ffs'):
+    
+    def bfe(self, X, y, feature_names, strategy = 'ffs',  stop_criterion = 'first_min', n_restarts_optimizer=0):
         '''Backward feature selctor for the evaluation of the importance of each
            feature using AGRNN;can be used to detect relevant features in the input space.
         Parameters
@@ -427,6 +427,12 @@ class Anisotropic_selector():
             will end as soon as adding another feature to the best subset causes 
             an increse of the MSE of the model. Differently, when 'full_search' is 
             selected, the entire forward feature selection will be performed.
+        n_restarts_optimizer : int, default = 0
+            The number of restarts of the optimizer for finding the kernel's
+            parameters which maximize the cost function. The first run
+            of the optimizer is performed from the kernel's initial parameters,
+            the remaining ones (if any) from inital sigmas sampled log-uniform randomly
+            from the space of allowed sigma-values. 
         '''
         self.mse_cv = 999999 #initalising a very large int variable
         y_ = y
@@ -439,7 +445,7 @@ class Anisotropic_selector():
                                                                 y_.reshape((-1, 1)),
                                                                 test_size=0.25,
                                                                 random_state = 42)
-            AGRNN = GRNN(calibration="warm_start", method="L-BFGS-B")
+            AGRNN = GRNN(calibration="warm_start", method="L-BFGS-B", n_restarts_optimizer=n_restarts_optimizer)
             best_model = AGRNN.fit(X_train, y_train.ravel())
             mse_run = MSE(y_test, best_model.predict(X_test))
             print('the current mse is '+str(mse_run))
@@ -454,4 +460,31 @@ class Anisotropic_selector():
                  else:
                     pass
         [self.best_inSpaceNames.append(feature_names[n]) for n in self.best_inSpaceIndex]
+        return self, print('Best subset is: ' + str(self.best_inSpaceNames))
+    
+    def max_dist(self, X, y, feature_names, n_restarts_optimizer=0):
+        '''Feature selctor for the evaluation of relevant feature using AGRNN.
+           Can be used to detect relevant features in the input space. All the
+           features which have bandwidth value lower than sqrt(n_feat) after 
+           the model calibration are labeled as relevant.
+        Parameters
+        ----------
+        X : array-like of shape = [n_samples, n_features]
+            The input samples. Generally corresponds to the training features.
+        y : array-like, shape = [n_samples]
+            The output or target values. Generally corresponds to the training targets.
+        feature_names : list
+            A list containing the names of the input features.
+        n_restarts_optimizer : int, default = 0
+            The number of restarts of the optimizer for finding the kernel's
+            parameters which maximize the cost function. The first run
+            of the optimizer is performed from the kernel's initial parameters,
+            the remaining ones (if any) from inital sigmas sampled log-uniform randomly
+            from the space of allowed sigma-values. 
+        '''
+        AGRNN = GRNN(calibration="warm_start", method="L-BFGS-B", n_restarts_optimizer=n_restarts_optimizer)
+        AGRNN.fit(X, y.ravel())
+        self.best_inSpaceIndex = [i for i in range(len(AGRNN.sigma)) if AGRNN.sigma[i] < np.sqrt(len(AGRNN.sigma))]
+        self.best_inSpaceNames = [feature_names[n] for n in self.best_inSpaceIndex]
+        self.best_inSpace = X[:, self.best_inSpaceIndex]
         return self, print('Best subset is: ' + str(self.best_inSpaceNames))
