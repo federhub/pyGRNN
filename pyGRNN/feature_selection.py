@@ -41,9 +41,9 @@ class Isotropic_selector():
             an isotropic GRNN.
         Parameters
         ----------
-        X : array-like of shape = [n_samples, n_features]
+        X_tr : array-like of shape = [n_samples, n_features]
             The input samples. Generally corresponds to the training features.
-        y : array-like, shape = [n_samples]
+        y_tr : array-like, shape = [n_samples]
             The output or target values. Generally corresponds to the training targets.'''
         IGRNN = GRNN()
         params_IGRNN = {'sigma' : list(np.arange(0.01, 1, 0.01)),
@@ -258,6 +258,11 @@ class Isotropic_selector():
         strategy : str, default = 'ffs'
             The search strategy for the feature selection. Can be forward ('ffs'),
             backward ('bfs') or exhaustive search ('es'). 
+        stop_criterion: str, default="first_min"
+            The stopping criterion of the algorithm. If 'first_min', the search
+            will end as soon as adding another feature to the best subset causes 
+            an increse of the MSE of the model. Differently, when 'full_search' is 
+            selected, the entire forward feature selection will be performed.   
         '''
         in_feat = X
         output = y
