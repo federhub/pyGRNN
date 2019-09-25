@@ -86,7 +86,7 @@ class GRNN(BaseEstimator, RegressorMixin):
     from sklearn.model_selection import  GridSearchCV
     from sklearn.metrics import mean_squared_error as MSE
 
-    from NeoGRNN import GRNN
+    from PyGRNN import GRNN
 
     # Loading the diabetes dataset
     diabetes = datasets.load_diabetes()
