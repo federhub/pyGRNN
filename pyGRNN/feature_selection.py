@@ -33,54 +33,54 @@ class Isotropic_selector():
         Cross Validation ('GSCV'). 
     
     Notes
------
-This Python code was developed and used for the following papers:
-F. Amato, F. Guignard, P. Jacquet, M. Kanveski. Exploration of data dependencies
-and feature selection using General Regression Neural Networks.
+    -----
+    This Python code was developed and used for the following papers:
+    F. Amato, F. Guignard, P. Jacquet, M. Kanveski. Exploration of data dependencies
+    and feature selection using General Regression Neural Networks.
 
 
-References
-----------
-F. Amato, F. Guignard, P. Jacquet, M. Kanveski. Exploration of data dependencies
-and feature selection using General Regression Neural Networks.
+    References
+    ----------
+    F. Amato, F. Guignard, P. Jacquet, M. Kanveski. Exploration of data dependencies
+    and feature selection using General Regression Neural Networks.
 
-D.F. Specht. A general regression neural network. IEEE transactions on neural 
-networks 2.6 (1991): 568-576.
-
-
-Examples
---------
-import numpy as np
-from sklearn import datasets
-from sklearn import preprocessing
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import  GridSearchCV
-from sklearn.metrics import mean_squared_error as MSE
-
-from PyGRNN import feature_selection as FS
-
-# Loading the diabetes dataset
-diabetes = datasets.load_diabetes()
-X = diabetes.data
-y = diabetes.target
-featnames = diabetes.feature_names
-
-# Example 1: use Isotropic Selector to explore data dependencies in the input 
-# space by analyzing the relatedness between features 
-IsotropicSelector = FS.Isotropic_selector(bandwidth = 'rule-of-thumb')
-IsotropicSelector.relatidness(X, feature_names = featnames)
-IsotropicSelector.plot_(feature_names = featnames)
-
-# Example 2: use Isotropic Selector to perform an exhaustive search; a rule-of-thumb
-# is used to select the optimal bandwidth for each subset of features
-IsotropicSelector = FS.Isotropic_selector(bandwidth = 'rule-of-thumb')
-IsotropicSelector.es(X, y.ravel(), feature_names=featnames)
+    D.F. Specht. A general regression neural network. IEEE transactions on neural 
+    networks 2.6 (1991): 568-576.
 
 
-# Example 2: use Isotropic Selector to perform a complete analysis of the input
-# space, recongising relevant, redundant, irrelevant features
-IsotropicSelector = FS.Isotropic_selector(bandwidth = 'rule-of-thumb')
-IsotropicSelector.feat_selection(X, y.ravel(), feature_names=featnames, strategy ='es')
+    Examples
+    --------
+    import numpy as np
+    from sklearn import datasets
+    from sklearn import preprocessing
+    from sklearn.model_selection import train_test_split
+    from sklearn.model_selection import  GridSearchCV
+    from sklearn.metrics import mean_squared_error as MSE
+
+    from PyGRNN import feature_selection as FS
+
+    # Loading the diabetes dataset
+    diabetes = datasets.load_diabetes()
+    X = diabetes.data
+    y = diabetes.target
+    featnames = diabetes.feature_names
+
+    # Example 1: use Isotropic Selector to explore data dependencies in the input 
+    # space by analyzing the relatedness between features 
+    IsotropicSelector = FS.Isotropic_selector(bandwidth = 'rule-of-thumb')
+    IsotropicSelector.relatidness(X, feature_names = featnames)
+    IsotropicSelector.plot_(feature_names = featnames)
+
+    # Example 2: use Isotropic Selector to perform an exhaustive search; a rule-of-thumb
+    # is used to select the optimal bandwidth for each subset of features
+    IsotropicSelector = FS.Isotropic_selector(bandwidth = 'rule-of-thumb')
+    IsotropicSelector.es(X, y.ravel(), feature_names=featnames)
+
+
+    # Example 2: use Isotropic Selector to perform a complete analysis of the input
+    # space, recongising relevant, redundant, irrelevant features
+    IsotropicSelector = FS.Isotropic_selector(bandwidth = 'rule-of-thumb')
+    IsotropicSelector.feat_selection(X, y.ravel(), feature_names=featnames, strategy ='es')
     """
     
     def __init__(self,bandwidth = 'rule-of-thumb'):
