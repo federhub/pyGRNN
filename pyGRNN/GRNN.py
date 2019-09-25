@@ -58,7 +58,68 @@ class GRNN(BaseEstimator, RegressorMixin):
         from the space of allowed sigma-values. 
     
     seed : int, default = 42
-        Random state used to initialize random generators.    
+        Random state used to initialize random generators.   
+    
+    
+    Notes
+    -----
+    This Python code was developed and used for the following papers:
+    F. Amato, F. Guignard, P. Jacquet, M. Kanveski. Exploration of data dependencies
+    and feature selection using General Regression Neural Networks.
+
+   
+   References
+    ----------
+    F. Amato, F. Guignard, P. Jacquet, M. Kanveski. Exploration of data dependencies
+    and feature selection using General Regression Neural Networks.
+
+    D.F. Specht. A general regression neural network. IEEE transactions on neural 
+    networks 2.6 (1991): 568-576.
+
+
+    Examples
+    --------
+    import numpy as np
+    from sklearn import datasets
+    from sklearn import preprocessing
+    from sklearn.model_selection import train_test_split
+    from sklearn.model_selection import  GridSearchCV
+    from sklearn.metrics import mean_squared_error as MSE
+
+    from NeoGRNN import GRNN
+
+    # Loading the diabetes dataset
+    diabetes = datasets.load_diabetes()
+    X = diabetes.data
+    y = diabetes.target
+    # Splitting data into training and testing
+    X_train, X_test, y_train, y_test = train_test_split(preprocessing.minmax_scale(X),
+                                                        preprocessing.minmax_scale(y.reshape((-1, 1))),
+                                                        test_size=0.25)
+    # Example 1: use Isotropic GRNN with a Grid Search Cross validation to select the optimal bandwidth
+    IGRNN = GRNN.GRNN()
+    params_IGRNN = {'kernel':["RBF"],
+                    'sigma' : list(np.arange(0.1, 4, 0.01)),
+                    'calibration' : ['None']
+                     }
+
+    grid_IGRNN = GridSearchCV(estimator=IGRNN,
+                              param_grid=params_IGRNN,
+                              scoring='neg_mean_squared_error',
+                              cv=5,
+                              verbose=1
+                              )
+    grid_IGRNN.fit(X_train, y_train.ravel())
+    best_model = grid_IGRNN.best_estimator_
+    y_pred = best_model.predict(X_test)
+    mse_IGRNN = MSE(y_test, y_pred)
+
+    # Example 1: use Anisotropic GRNN with Limited-Memory BFGS algorithm to select the optimal bandwidths
+    AGRNN = GRNN.GRNN(calibration="gradient_search")
+    AGRNN.fit(X_train, y_train.ravel())
+    sigma=AGRNN.sigma 
+    y_pred = AGRNN.predict(X_test)
+    mse_AGRNN = MSE(y_test, y_pred)
     """
 
     def __init__(self, kernel='RBF', sigma=0.4, n_splits=5, calibration='warm_start', method='L-BFGS-B', bnds=(0, None), n_restarts_optimizer=0, seed = 42):
