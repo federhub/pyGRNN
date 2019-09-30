@@ -222,15 +222,15 @@ class GRNN(BaseEstimator, RegressorMixin):
             print('Warm start concluded. The optimum isotropic sigma is ' + str(self.sigma))
             self.sigma = np.full(len(self.X_[0]), np.around(self.sigma, decimals=3))
             self.bnds = (bounds,)*len(self.X_[0])
-            print ('Executing gradient search...')
+            #print ('Executing gradient search...')
             calibrate_sigma(self)
             print('Gradient search concluded. The optimum sigma is ' + str(self.sigma))
         elif self.calibration is 'gradient_search':
-            print ('Executing gradient search...')
+            #print ('Executing gradient search...')
             self.sigma = np.full(len(self.X_[0]), self.sigma)
             self.bnds = (bounds,)*len(self.X_[0])
             calibrate_sigma(self)
-            print('Gradient search concluded. The optimum sigma is ' + str(self.sigma))
+            #print('Gradient search concluded. The optimum sigma is ' + str(self.sigma))
         else:
             pass
                    
