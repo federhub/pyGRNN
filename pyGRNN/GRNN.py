@@ -86,7 +86,7 @@ class GRNN(BaseEstimator, RegressorMixin):
     from sklearn.model_selection import  GridSearchCV
     from sklearn.metrics import mean_squared_error as MSE
 
-    from PyGRNN import GRNN
+    from pyGRNN import GRNN
 
     # Loading the diabetes dataset
     diabetes = datasets.load_diabetes()
@@ -97,7 +97,7 @@ class GRNN(BaseEstimator, RegressorMixin):
                                                         preprocessing.minmax_scale(y.reshape((-1, 1))),
                                                         test_size=0.25)
     # Example 1: use Isotropic GRNN with a Grid Search Cross validation to select the optimal bandwidth
-    IGRNN = GRNN.GRNN()
+    IGRNN = GRNN()
     params_IGRNN = {'kernel':["RBF"],
                     'sigma' : list(np.arange(0.1, 4, 0.01)),
                     'calibration' : ['None']
@@ -115,7 +115,7 @@ class GRNN(BaseEstimator, RegressorMixin):
     mse_IGRNN = MSE(y_test, y_pred)
 
     # Example 2: use Anisotropic GRNN with Limited-Memory BFGS algorithm to select the optimal bandwidths
-    AGRNN = GRNN.GRNN(calibration="gradient_search")
+    AGRNN = GRNN(calibration="gradient_search")
     AGRNN.fit(X_train, y_train.ravel())
     sigma=AGRNN.sigma 
     y_pred = AGRNN.predict(X_test)
