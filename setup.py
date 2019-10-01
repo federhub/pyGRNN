@@ -3,7 +3,8 @@ setup(
   name = 'pyGRNN',         
   packages = ['pyGRNN'],   
   version = 'v0.0.2.1',      
-  license='MIT',      
+  license='MIT',  
+  README = (./"README.md").read_text(),
   description = 'Python implementation of General Regression Neural Network (Nadaraya-Watson Estimator). A Feature Selection module based on GRNN is also provided',   # Give a short description about your library
   author = 'Federico Amato',                   
   author_email = 'federico.amato@unil.ch',      #
