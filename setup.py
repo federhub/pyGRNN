@@ -10,18 +10,14 @@ setup(
   url = 'https://github.com/federhub/pyGRNN',  
   download_url = 'https://github.com/federhub/pyGRNN/archive/v0.0.2-beta.tar.gz',    #
   keywords = ['Machine Learning', 'General Regression Neural Network', 'Kernel Regression', 'Feature Selection'],   
-  install_requires=[         
-          'validators',
-          'beautifulsoup4',
+  install_requires=[
           'pandas',
           'numpy',
           'seaborn',
-          'sklearn',
+          'scikit-learn',
           'itertools',
           'matplotlib',
           'scipy',
-          'operator',
-          'itertools' 
       ],
   classifiers=[
     'Development Status :: 4 - Beta',     
