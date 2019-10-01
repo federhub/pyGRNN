@@ -2,7 +2,7 @@ from distutils.core import setup
 setup(
   name = 'pyGRNN',         
   packages = ['pyGRNN'],   
-  version = '0.0.1',      
+  version = 'v0.0.2-beta',      
   license='MIT',      
   description = 'Python implementation of General Regression Neural Network (Nadaraya-Watson Estimator). A Feature Selection module based on GRNN is also provided',   # Give a short description about your library
   author = 'Federico Amato',                   
