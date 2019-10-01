@@ -57,7 +57,7 @@ class Isotropic_selector():
     from sklearn.model_selection import  GridSearchCV
     from sklearn.metrics import mean_squared_error as MSE
 
-    from PyGRNN import feature_selection as FS
+    from pyGRNN import feature_selection as FS
 
     # Loading the diabetes dataset
     diabetes = datasets.load_diabetes()
@@ -77,7 +77,7 @@ class Isotropic_selector():
     IsotropicSelector.es(X, y.ravel(), feature_names=featnames)
 
 
-    # Example 2: use Isotropic Selector to perform a complete analysis of the input
+    # Example 3: use Isotropic Selector to perform a complete analysis of the input
     # space, recongising relevant, redundant, irrelevant features
     IsotropicSelector = FS.Isotropic_selector(bandwidth = 'rule-of-thumb')
     IsotropicSelector.feat_selection(X, y.ravel(), feature_names=featnames, strategy ='es')
@@ -488,7 +488,7 @@ class Anisotropic_selector():
     from sklearn.model_selection import  GridSearchCV
     from sklearn.metrics import mean_squared_error as MSE
 
-    from PyGRNN import feature_selection as FS
+    from pyGRNN import feature_selection as FS
 
     # Loading the diabetes dataset
     diabetes = datasets.load_diabetes()
