@@ -27,7 +27,7 @@ from sklearn import preprocessing
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import  GridSearchCV
 from sklearn.metrics import mean_squared_error as MSE
-from PyGRNN import GRNN
+from pyGRNN import GRNN
 # Loading the diabetes dataset
 diabetes = datasets.load_diabetes()
 X = diabetes.data
@@ -38,7 +38,7 @@ X_train, X_test, y_train, y_test = train_test_split(preprocessing.minmax_scale(X
                                                     test_size=0.25)
 
 # Example 1: use Isotropic GRNN with a Grid Search Cross validation to select the optimal bandwidth
-IGRNN = GRNN.GRNN()
+IGRNN = GRNN()
 params_IGRNN = {'kernel':["RBF"],
                 'sigma' : list(np.arange(0.1, 4, 0.01)),
                 'calibration' : ['None']
@@ -55,7 +55,7 @@ y_pred = best_model.predict(X_test)
 mse_IGRNN = MSE(y_test, y_pred)
 
 # Example 2: use Anisotropic GRNN with Limited-Memory BFGS algorithm to select the optimal bandwidths
-AGRNN = GRNN.GRNN(calibration="gradient_search")
+AGRNN = GRNN(calibration="gradient_search")
 AGRNN.fit(X_train, y_train.ravel())
 sigma=AGRNN.sigma 
 y_pred = AGRNN.predict(X_test)
@@ -65,22 +65,25 @@ mse_AGRNN = MSE(y_test, y_pred)
 The package can also be used to perform feature selection:
 
 ```sh
-from PyGRNN import feature_selection as FS
+from pyGRNN import feature_selection as FS
 # Loading the diabetes dataset
 diabetes = datasets.load_diabetes()
 X = diabetes.data
 y = diabetes.target
 featnames = diabetes.feature_names
+
 # Example 1: use Isotropic Selector to explore data dependencies in the input 
 # space by analyzing the relatedness between features 
 IsotropicSelector = FS.Isotropic_selector(bandwidth = 'rule-of-thumb')
 IsotropicSelector.relatidness(X, feature_names = featnames)
 IsotropicSelector.plot_(feature_names = featnames)
+
 # Example 2: use Isotropic Selector to perform an exhaustive search; a rule-of-thumb
 # is used to select the optimal bandwidth for each subset of features
 IsotropicSelector = FS.Isotropic_selector(bandwidth = 'rule-of-thumb')
 IsotropicSelector.es(X, y.ravel(), feature_names=featnames)
-# Example 2: use Isotropic Selector to perform a complete analysis of the input
+
+# Example 3: use Isotropic Selector to perform a complete analysis of the input
 # space, recongising relevant, redundant, irrelevant features
 IsotropicSelector = FS.Isotropic_selector(bandwidth = 'rule-of-thumb')
 IsotropicSelector.feat_selection(X, y.ravel(), feature_names=featnames, strategy ='es')
