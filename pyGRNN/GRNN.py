@@ -114,7 +114,7 @@ class GRNN(BaseEstimator, RegressorMixin):
     y_pred = best_model.predict(X_test)
     mse_IGRNN = MSE(y_test, y_pred)
 
-    # Example 1: use Anisotropic GRNN with Limited-Memory BFGS algorithm to select the optimal bandwidths
+    # Example 2: use Anisotropic GRNN with Limited-Memory BFGS algorithm to select the optimal bandwidths
     AGRNN = GRNN.GRNN(calibration="gradient_search")
     AGRNN.fit(X_train, y_train.ravel())
     sigma=AGRNN.sigma 
