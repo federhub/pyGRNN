@@ -12,7 +12,7 @@ For more insights on GRNN, check [these slides](https://github.com/federhub/pyGR
 
 ## Install
 
-```sh
+```py
 $ pip install pyGRNN
 ```
 
@@ -20,7 +20,7 @@ $ pip install pyGRNN
 
 pyGRNN can be used to perform Isotropic and Anisotropic General Regression Neural Networks:
 
-```sh
+```py
 import numpy as np
 from sklearn import datasets
 from sklearn import preprocessing
@@ -64,7 +64,7 @@ mse_AGRNN = MSE(y_test, y_pred)
 
 The package can also be used to perform feature selection:
 
-```sh
+```py
 from pyGRNN import feature_selection as FS
 # Loading the diabetes dataset
 diabetes = datasets.load_diabetes()
