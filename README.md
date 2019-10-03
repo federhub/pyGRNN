@@ -13,7 +13,7 @@ For more insights on GRNN, check [these slides](https://github.com/federhub/pyGR
 ## Install
 
 ```py
-$ pip install pyGRNN
+pip install pyGRNN
 ```
 
 ## Examples
