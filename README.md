@@ -8,7 +8,7 @@ GRNN is an adaptation in terms of neural network of the Nadaraya-Watson estimato
 The traditional GRNN architecture is based on the use of one unique value of the bandwidth for all the features. This Isotropic structure of the network (IGRNN) can be used as a wrapper for feature selection. This approach permits a complete description of the input space, identifying relevant, irrelevant and redundant features. Specifically, redundancy and irrelevancy are associated to the identification of relatedness, i.e. the non-linear predictability of an input variable using the other features of the input space. 
 Anisotropic (or Adaptive) GRNN (AGRNN) are an evolution of GRNN in which different values are given to the bandwidth corresponding to each feature. A proper calibration of the bandwidths will scale the input features depending on their explanatory power. Specifically, a large smoothing parameter will give rise to a lower discriminative power of the associated feature, and vice versa. Hence, AGRNN can be considered as an embedded feature selection method in which the bandwidth values of the kernel express a measure of the relevancy of the features.
 
-For more insights on GRNN, check [these slides] (https://github.com/federhub/pyGRNN/blob/master/Feature_Selection_with_GRNN.pdf) or try the [step-by-step tutorial in jupyter notebook!] (https://github.com/federhub/pyGRNN/blob/master/Tutorial/Tutorial_PyGRNN.ipynb)
+For more insights on GRNN, check [these slides](https://github.com/federhub/pyGRNN/blob/master/Feature_Selection_with_GRNN.pdf) or try the [step-by-step tutorial in jupyter notebook!](https://github.com/federhub/pyGRNN/blob/master/Tutorial/Tutorial_PyGRNN.ipynb)
 
 ## Install
 
