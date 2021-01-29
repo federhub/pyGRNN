@@ -1,6 +1,7 @@
 # pyGRNN
 Python implementation of General Regression Neural Network (GRNN, also known as Nadaraya-Watson Estimator). A Feature Selection module based on GRNN is also provided.
-[Check the full paper "On Feature Selection Using Anisotropic General Regression Neural Network"](https://www.esann.org/sites/default/files/proceedings/2020/ES2020-16.pdf)
+
+## [Check the full paper "On Feature Selection Using Anisotropic General Regression Neural Network"](https://www.esann.org/sites/default/files/proceedings/2020/ES2020-16.pdf)
 
 ## Getting Started with GRNN
 
