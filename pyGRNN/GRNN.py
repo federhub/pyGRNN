@@ -6,6 +6,7 @@ Created on Wed Jan 16 10:30:37 2019
 """
 import numpy as np
 from operator import itemgetter
+import warnings
 from scipy import optimize
 from sklearn.metrics import mean_squared_error as MSE
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
@@ -158,7 +159,7 @@ class GRNN(BaseEstimator, RegressorMixin):
         def cost(sigma_):
             '''Cost function to be minimized. It computes the cross validation
                 error for a given sigma vector.'''
-            kf = KFold(n_splits= self.n_splits, random_state=self.seed)
+            kf = KFold(n_splits= self.n_splits, random_state=self.seed, shuffle=True)
             kf.get_n_splits(self.X_)
             cv_err = []
             for train_index, validate_index in kf.split(self.X_):
@@ -183,6 +184,7 @@ class GRNN(BaseEstimator, RegressorMixin):
                 opt_sigma = opt['x']
                 opt_cv_error = opt['fun']
             else:
+                warnings.warn('Optimization may have failed. Consider changing optimization solver for the gradient search')
                 opt_sigma = np.full(len(self.X_[0]), np.nan)
                 opt_cv_error = np.inf
                 pass
