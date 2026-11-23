@@ -1,4 +1,6 @@
 # pyGRNN
+[![Tests](https://github.com/federhub/pyGRNN/actions/workflows/tests.yml/badge.svg)](https://github.com/federhub/pyGRNN/actions/workflows/tests.yml)
+
 Python implementation of General Regression Neural Network (GRNN, also known as Nadaraya-Watson Estimator). A Feature Selection module based on GRNN is also provided.
 
 ## [Check the full paper "On Feature Selection Using Anisotropic General Regression Neural Network"](https://www.esann.org/sites/default/files/proceedings/2020/ES2020-16.pdf)
@@ -91,10 +93,17 @@ IsotropicSelector = FS.Isotropic_selector(bandwidth = 'rule-of-thumb')
 IsotropicSelector.feat_selection(X, y.ravel(), feature_names=featnames, strategy ='es')
 ```
 
+## Running tests
+
+```sh
+pip install -e .[test]
+pytest
+```
+
 ## Authors
 
 * **Federico Amato** - *Postdoctoral Research Fellow,* - [GeoKDD lab, University of Lausanne](https://wp.unil.ch/geokdd/)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

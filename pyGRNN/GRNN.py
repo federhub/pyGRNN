@@ -64,6 +64,14 @@ class GRNN(BaseEstimator, RegressorMixin):
     
     Notes
     -----
+    shortcut: `fit()` writes the calibrated bandwidth back into `self.sigma`
+    (the same attribute used as the constructor parameter), so `sklearn.base.clone()`
+    of an already-fitted instance carries the calibrated value over instead of
+    resetting it to the constructor default. Construct a fresh GRNN(...) rather
+    than cloning a fitted one if you need the original default back. Upgrade
+    path: split into `sigma` (param) and `sigma_` (fitted), a breaking change
+    for every example in this README/docstring.
+
     This Python code was developed and used for the following papers:
     F. Amato, F. Guignard, P. Jacquet, M. Kanveski. Exploration of data dependencies
     and feature selection using General Regression Neural Networks.
@@ -152,10 +160,13 @@ class GRNN(BaseEstimator, RegressorMixin):
         
         self.X_ = X
         self.y_ = y
-        bounds = self.bnds
-        
+        # Local working copies: `self.bnds`/`self.sigma` (constructor params) are
+        # never overwritten here, so fit() can be called again on the same instance.
+        bnds_ = self.bnds
+        sigma0 = self.sigma
+
         np.seterr(divide='ignore', invalid='ignore')
-        
+
         def cost(sigma_):
             '''Cost function to be minimized. It computes the cross validation
                 error for a given sigma vector.'''
@@ -179,7 +190,7 @@ class GRNN(BaseEstimator, RegressorMixin):
         def optimization(x0_):
             '''A function to find the optimal values of sigma (i.e. the values 
                minimizing the cost) given an inital guess x0.'''
-            opt = optimize.minimize(cost, x0_, method=self.method, bounds=self.bnds)
+            opt = optimize.minimize(cost, x0_, method=self.method, bounds=bnds_)
             if opt['success'] is True:
                 opt_sigma = opt['x']
                 opt_cv_error = opt['fun']
@@ -190,10 +201,10 @@ class GRNN(BaseEstimator, RegressorMixin):
                 pass
             return [opt_sigma, opt_cv_error]
         
-        def calibrate_sigma(self):
-            '''A function to find the values of sigma minimizing the CV-MSE. The 
-            optimization is based on scipy.optimize.minimize.'''    
-            x0 = np.asarray(self.sigma) # Starting guess (either user-defined or measured with warm start)
+        def calibrate_sigma(x0):
+            '''A function to find the values of sigma minimizing the CV-MSE, given
+            a starting guess x0 (either user-defined or measured with warm start).
+            The optimization is based on scipy.optimize.minimize.'''
             if self.n_restarts_optimizer > 0:
                 #First optimize starting from theta specified in kernel
                 optima = [optimization(x0)] 
@@ -209,29 +220,28 @@ class GRNN(BaseEstimator, RegressorMixin):
             
             # Select sigma from the run minimizing cost
             cost_values = list(map(itemgetter(1), optima))
-            self.sigma = optima[np.argmin(cost_values)][0]
-            self.cv_error = np.min(cost_values) 
-            return self
-        
-        
-        if self.calibration is 'warm_start':
+            self.cv_error = np.min(cost_values)
+            return optima[np.argmin(cost_values)][0]
+
+
+        if self.calibration == 'warm_start':
             print('Executing warm start...')
-            self.bnds = (bounds,)           
-            x0 = np.asarray(self.sigma)
-            optima = [optimization(x0)]            
+            bnds_ = (self.bnds,)
+            x0 = np.asarray(sigma0)
+            optima = [optimization(x0)]
             cost_values = list(map(itemgetter(1), optima))
-            self.sigma = optima[np.argmin(cost_values)][0]
-            print('Warm start concluded. The optimum isotropic sigma is ' + str(self.sigma))
-            self.sigma = np.full(len(self.X_[0]), np.around(self.sigma, decimals=3))
-            self.bnds = (bounds,)*len(self.X_[0])
+            warm_sigma = optima[np.argmin(cost_values)][0]
+            print('Warm start concluded. The optimum isotropic sigma is ' + str(warm_sigma))
+            x0 = np.full(len(self.X_[0]), np.around(warm_sigma, decimals=3))
+            bnds_ = (self.bnds,)*len(self.X_[0])
             #print ('Executing gradient search...')
-            calibrate_sigma(self)
+            self.sigma = calibrate_sigma(x0)
             print('Gradient search concluded. The optimum sigma is ' + str(self.sigma))
-        elif self.calibration is 'gradient_search':
+        elif self.calibration == 'gradient_search':
             #print ('Executing gradient search...')
-            self.sigma = np.full(len(self.X_[0]), self.sigma)
-            self.bnds = (bounds,)*len(self.X_[0])
-            calibrate_sigma(self)
+            x0 = np.full(len(self.X_[0]), sigma0)
+            bnds_ = (self.bnds,)*len(self.X_[0])
+            self.sigma = calibrate_sigma(x0)
             #print('Gradient search concluded. The optimum sigma is ' + str(self.sigma))
         else:
             pass

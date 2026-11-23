@@ -319,9 +319,9 @@ class Isotropic_selector():
         self.redundant = [] # we will store here the indexes of redundant features
         self.irrelevant = [] # we will store here the indexes of irrelevant features
         print('Searching relevant features...')
-        if strategy is 'ffs':
+        if strategy == 'ffs':
             Isotropic_selector.ffs(self, in_feat, output, feature_names, stop_criterion = stop_criterion) # performing a forward feature selection to find relevant features
-        elif strategy is 'bfs':
+        elif strategy == 'bfs':
             Isotropic_selector.bfs(self, in_feat, output, feature_names, stop_criterion = stop_criterion) # performing backward feature selection to find relevant features
         else:
              Isotropic_selector.es(self, in_feat, output, feature_names) # performing an exhaustive search to find relevant features
@@ -336,9 +336,9 @@ class Isotropic_selector():
             feat_idx = [column for column in np.arange(0, in_feat.shape[1],1) if column != col] 
             feat_names = [feature_names[n] for n in feat_idx]
             # performing the search strategy
-            if strategy is 'ffs':
+            if strategy == 'ffs':
                 Isotropic_selector.ffs(self, feat, target, feat_names) # performing a forward feature selection to find relevant features
-            elif strategy is 'bfs':
+            elif strategy == 'bfs':
                 Isotropic_selector.bfs(self, feat, target, feat_names) # performing backward feature selection to find relevant features
             else:
                 Isotropic_selector.es(self, feat, target, feat_names) # performing an exhaustive search to find relevant features
@@ -408,9 +408,9 @@ class Isotropic_selector():
                 feat_idx = [column for column in np.arange(0, X.shape[1],1) if column != col] 
                 feat_names = [feature_names[n] for n in feat_idx]
                 # performing the search strategy
-                if strategy is 'ffs':
+                if strategy == 'ffs':
                     Isotropic_selector.ffs(self, feat, target, feat_names) # performing a forward feature selection to find relevant features
-                elif strategy is 'bfs':
+                elif strategy == 'bfs':
                     Isotropic_selector.bfs(self, feat, target, feat_names) # performing backward feature selection to find relevant features
                 else:
                     Isotropic_selector.es(self, feat, target, feat_names) # performing an exhaustive search to find relevant features
