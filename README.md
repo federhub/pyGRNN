@@ -102,7 +102,7 @@ pytest
 
 ## Authors
 
-* **Federico Amato** - *Postdoctoral Research Fellow,* - [GeoKDD lab, University of Lausanne](https://wp.unil.ch/geokdd/)
+* **Federico Amato**
 
 ## License
 
