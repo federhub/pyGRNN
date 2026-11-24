@@ -620,7 +620,7 @@ class Anisotropic_selector:
             selected, the entire forward feature selection will be performed.
         n_restarts_optimizer : int, default = 0
             The number of restarts of the optimizer for finding the kernel's
-            parameters which maximize the cost function. The first run
+            parameters which minimize the cost function. The first run
             of the optimizer is performed from the kernel's initial parameters,
             the remaining ones (if any) from inital sigmas sampled log-uniform randomly
             from the space of allowed sigma-values.
@@ -661,10 +661,14 @@ class Anisotropic_selector:
         return self
 
     def max_dist(self, X, y, feature_names, n_restarts_optimizer=0):
-        """Feature selctor for the evaluation of relevant feature using AGRNN.
-           Can be used to detect relevant features in the input space. All the
-           features which have bandwidth value lower than sqrt(n_feat) after
-           the model calibration are labeled as relevant.
+        """Feature selector for the evaluation of relevant features using AGRNN,
+           implementing Algorithm 1 of Amato et al., "On Feature Selection Using
+           Anisotropic General Regression Neural Network" (ESANN 2020). Each
+           feature is rescaled to [0, 1] internally - required for the threshold
+           below to be meaningful regardless of the input's original units/scale
+           - an AGRNN is calibrated on the rescaled data, and a feature is
+           labeled as relevant if its calibrated bandwidth is lower than or
+           equal to 1 (the paper's threshold for [0, 1]-normalized features).
         Parameters
         ----------
         X : array-like of shape = [n_samples, n_features]
@@ -675,21 +679,20 @@ class Anisotropic_selector:
             A list containing the names of the input features.
         n_restarts_optimizer : int, default = 0
             The number of restarts of the optimizer for finding the kernel's
-            parameters which maximize the cost function. The first run
+            parameters which minimize the cost function. The first run
             of the optimizer is performed from the kernel's initial parameters,
             the remaining ones (if any) from inital sigmas sampled log-uniform randomly
             from the space of allowed sigma-values.
         """
+        X_scaled = preprocessing.minmax_scale(X)
         AGRNN = GRNN(
             calibration="warm_start",
             method="L-BFGS-B",
             n_restarts_optimizer=n_restarts_optimizer,
         )
-        AGRNN.fit(X, y.ravel())
+        AGRNN.fit(X_scaled, y.ravel())
         self.best_inSpaceIndex = [
-            i
-            for i in range(len(AGRNN.sigma))
-            if AGRNN.sigma[i] < np.sqrt(len(AGRNN.sigma))
+            i for i in range(len(AGRNN.sigma)) if AGRNN.sigma[i] <= 1
         ]
         self.best_inSpaceNames = [feature_names[n] for n in self.best_inSpaceIndex]
         self.best_inSpace = X[:, self.best_inSpaceIndex]
