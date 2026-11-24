@@ -525,18 +525,13 @@ class Isotropic_selector:
             )
         else:
             pass
-        df = pd.DataFrame(columns=feature_names)
-        feature = []
-        best_set = []
-        for k, v in self.relatidness_.items():
-            feature.append(k)
-            best_set.append(list(v[0][0]))
-        for col, i in enumerate(best_set):
-            presence = []
-            for feat in feature_names:
-                a = countX(i, feat)
-                presence.append(a)
-            df.iloc[:, col] = pd.Series(presence).values
+        # Column j: which features are in the best subset for predicting feature j
+        best_set = [list(v[0][0]) for v in self.relatidness_.values()]
+        df = pd.DataFrame(
+            [[countX(best, feat) for best in best_set] for feat in feature_names],
+            index=feature_names,
+            columns=feature_names,
+        )
         # plotting an heatmap with the best results
         plt.style.use("ggplot")
         with sns.axes_style("white"):
