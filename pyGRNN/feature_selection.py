@@ -127,13 +127,10 @@ class Isotropic_selector():
         var = list(np.arange(0, self.X.shape[1], 1))
         series =combs(var)#[1::]
         print('Exploring the ' +str(2**len(var)-1) + ' possible combination of features...')
-        # Set counter
-        i = 0
         # Run a model for each computation
         self.mse_cv = 999999 #initalising a very large int variable
         for fset in series:
-            #print ('Exploring combination ' + str(i) + '...') 
-            X_run= self.X[:, list(fset)] 
+            X_run= self.X[:, list(fset)]
             X_train, X_test, y_train, y_test = train_test_split(preprocessing.StandardScaler().fit_transform(X_run),
                                                                 y.reshape((-1, 1)),
                                                                 test_size=0.25,
@@ -147,18 +144,17 @@ class Isotropic_selector():
                 best_model = Isotropic_selector.isotropic_GSCV(X_train, y_train.ravel())
             else: 
                 raise ValueError('Bandwidth search strategy must be one between rule-of-thumb and GSCV!')
-            # Run a GRNN with the selected bandwidth kernel 
+            # Run a GRNN with the selected bandwidth kernel
             y_pred = best_model.predict(X_test)
-            self.ex_search.update({fset :[MSE(y_test, y_pred)]})
-            if (MSE(y_test, y_pred)) < self.mse_cv:
-                self.mse_cv = MSE(y_test, y_pred)
-                self.best_inSpaceIndex = fset 
+            mse_run = MSE(y_test, y_pred)
+            self.ex_search.update({fset :[mse_run]})
+            if mse_run < self.mse_cv:
+                self.mse_cv = mse_run
+                self.best_inSpaceIndex = fset
                 self.best_inSpace = X_run
                 self.best_model = best_model
             else:
                 pass
-            #print('Combination ' + str(i) +' tested.')
-            i += 1   
         [self.best_inSpaceNames.append(feature_names[n]) for n in self.best_inSpaceIndex]
         print('The best subset of features is ' + str(self.best_inSpaceNames))
         return self  
@@ -207,8 +203,9 @@ class Isotropic_selector():
                     raise ValueError('Bandwidth search strategy must be one between rule-of-thumb and GSCV!')
                 # Run a GRNN with the selected bandwidth kernel 
                 y_pred = best_model.predict(X_test)
-                if (MSE(y_test, y_pred)) < mse_run_best:
-                    mse_run_best = MSE(y_test, y_pred)
+                mse_run = MSE(y_test, y_pred)
+                if mse_run < mse_run_best:
+                    mse_run_best = mse_run
                     best_comb_run = fset
                     X_run = X_
                 else:
@@ -225,7 +222,8 @@ class Isotropic_selector():
                 else:
                     pass
         [self.best_inSpaceNames.append(feature_names[n]) for n in self.best_inSpaceIndex]
-        return self, print('Best subset is: ' + str(self.best_inSpaceNames))
+        print('Best subset is: ' + str(self.best_inSpaceNames))
+        return self
             
     def bfs(self, X, y, feature_names, stop_criterion = 'first_min'):
         '''Backward feature selctor for the evaluation of the importance of each
@@ -271,8 +269,9 @@ class Isotropic_selector():
                     raise ValueError('Bandwidth search strategy must be one between rule-of-thumb and GSCV!')
                 # Run a GRNN with the selected bandwidth kernel 
                 y_pred = best_model.predict(X_test)
-                if (MSE(y_test, y_pred)) < mse_run_best:
-                    mse_run_best = MSE(y_test, y_pred)
+                mse_run = MSE(y_test, y_pred)
+                if mse_run < mse_run_best:
+                    mse_run_best = mse_run
                     best_comb_run = fset
                     X_run = X_
                 else:
@@ -290,7 +289,8 @@ class Isotropic_selector():
                 else:
                     pass
         [self.best_inSpaceNames.append(feature_names[n]) for n in self.best_inSpaceIndex]
-        return self, print('Best subset is: ' + str(self.best_inSpaceNames))
+        print('Best subset is: ' + str(self.best_inSpaceNames))
+        return self
 
     
     def feat_selection(self, X, y, feature_names, strategy = 'ffs', stop_criterion = 'first_min'):
@@ -435,18 +435,16 @@ class Isotropic_selector():
         for k,v in self.relatidness_.items():
             feature.append(k)
             best_set.append(list(v[0][0]))
-        col = 0
-        for i in best_set: 
+        for col, i in enumerate(best_set):
             presence = []
             for feat in feature_names:
                 a = countX(i, feat)
                 presence.append(a)
             df.iloc[:,col] = pd.Series(presence).values
-            col += 1
         # plotting an heatmap with the best results
         plt.style.use('ggplot')
         with sns.axes_style("white"):
-                f, ax = plt.subplots(figsize=(11, 9))
+                _, ax = plt.subplots(figsize=(11, 9))
                 ax.tick_params(labelsize = 14)
                 ax.xaxis.set_ticks_position('top')
                 cmap = sns.diverging_palette(220, 10, as_cmap=True)
@@ -501,7 +499,7 @@ class Anisotropic_selector():
     AnisotropicSelector.max_dist(X, y.ravel(), feature_names=featnames)
     """
     
-    def bfe(self, X, y, feature_names, strategy = 'ffs',  stop_criterion = 'first_min', n_restarts_optimizer=0):
+    def bfe(self, X, y, feature_names, stop_criterion = 'first_min', n_restarts_optimizer=0):
         '''Backward feature selctor for the evaluation of the importance of each
            feature using AGRNN;can be used to detect relevant features in the input space.
         Parameters
@@ -550,7 +548,8 @@ class Anisotropic_selector():
                  else:
                     pass
         [self.best_inSpaceNames.append(feature_names[n]) for n in self.best_inSpaceIndex]
-        return self, print('Best subset is: ' + str(self.best_inSpaceNames))
+        print('Best subset is: ' + str(self.best_inSpaceNames))
+        return self
     
     def max_dist(self, X, y, feature_names, n_restarts_optimizer=0):
         '''Feature selctor for the evaluation of relevant feature using AGRNN.
@@ -577,4 +576,5 @@ class Anisotropic_selector():
         self.best_inSpaceIndex = [i for i in range(len(AGRNN.sigma)) if AGRNN.sigma[i] < np.sqrt(len(AGRNN.sigma))]
         self.best_inSpaceNames = [feature_names[n] for n in self.best_inSpaceIndex]
         self.best_inSpace = X[:, self.best_inSpaceIndex]
-        return self, print('Best subset is: ' + str(self.best_inSpaceNames))
+        print('Best subset is: ' + str(self.best_inSpaceNames))
+        return self

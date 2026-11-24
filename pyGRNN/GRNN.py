@@ -16,50 +16,49 @@ from sklearn.model_selection import KFold
 
 class GRNN(BaseEstimator, RegressorMixin):
     """A General Regression Neural Network, based on the Nadaraya-Watson estimator.
-    Parameters:
+    Parameters
     ----------
-    kernel : str, default="rbf"
+    kernel : str, default="RBF"
         Kernel function to be casted in the regression.
-        The radial basis function (rbf) is used by default: K(x,x')=exp(-|x-x'|^2/(2 sigma^2))
-        
-    sigma : float, array, default=None
-        Bandwidth standard deviation parameter for the Kernel. All Kernels are casted from the 
-        sklearn.metrics.pairwise library. Check its documentation for further 
+        The radial basis function (RBF) is used by default: K(x,x')=exp(-|x-x'|^2/(2 sigma^2))
+
+    sigma : float, array, default=0.4
+        Bandwidth standard deviation parameter for the Kernel. All Kernels are casted from the
+        sklearn.metrics.pairwise library. Check its documentation for further
         info and to find a list of all the built-in Kernels.
-    
-    n_splits : int, default 10
-        Number of folds used in the K-Folds CV definition of the sigma. 
+
+    n_splits : int, default=5
+        Number of folds used in the K-Folds CV definition of the sigma.
         Must be at least 2.
-    
-    calibration : str, default=None
-        Type of calibration of the sigma. 
-        'gradient_search' minimizes the loss function by applying the scipy.optimize.minimize function. 
+
+    calibration : str, default="warm_start"
+        Type of calibration of the sigma.
+        'gradient_search' minimizes the loss function by applying the scipy.optimize.minimize function.
         Gradient search can be used for isotropic Kernels (sigma = int, float),
         or on anisotropic Kernel (sigma = list).
-        'warm_start' is used when sigma is a single scalar. Gradient search is applied 
-        to find the best sigma value for an isotropic Kernel (all sigmas are the same). The optimized 
-        parameter is then used as a starting point to search the optimal solution for an 
+        'warm_start' is used when sigma is a single scalar. Gradient search is applied
+        to find the best sigma value for an isotropic Kernel (all sigmas are the same). The optimized
+        parameter is then used as a starting point to search the optimal solution for an
         anisotropic Kernel (having one sigma per feature).
-    
-    method: str, default=L-BFGS-B
-        Type of solver for the gradient search (used to find the local minimum of the cost function). 
-        The default solver used is the Nelder-Mead. 
-        Other choises (such as the CG based on the Polak and 
+
+    method : str, default="L-BFGS-B"
+        Type of solver for the gradient search (used to find the local minimum of the cost function).
+        Other choises (such as the CG based on the Polak and
         Ribiere algorithm) are discussed on the help of the scipy function.
-    
-    bounds : list, default=(0, None)
+
+    bnds : list, default=(0, None)
         (min, max) pairs for each element in x, defining the bounds on that parameter.
         Use None or +-inf for one of min or max when there is no bound in that direction.
-    
+
     n_restarts_optimizer : int, default = 0
         The number of restarts of the optimizer for finding the kernel's
-        parameters which maximize the cost function. The first run
+        parameters which minimize the cost function. The first run
         of the optimizer is performed from the kernel's initial parameters,
         the remaining ones (if any) from inital sigmas sampled log-uniform randomly
-        from the space of allowed sigma-values. 
-    
+        from the space of allowed sigma-values.
+
     seed : int, default = 42
-        Random state used to initialize random generators.   
+        Random state used to initialize random generators.
     
     
     Notes
@@ -165,27 +164,28 @@ class GRNN(BaseEstimator, RegressorMixin):
         bnds_ = self.bnds
         sigma0 = self.sigma
 
-        np.seterr(divide='ignore', invalid='ignore')
-
         def cost(sigma_):
             '''Cost function to be minimized. It computes the cross validation
                 error for a given sigma vector.'''
             kf = KFold(n_splits= self.n_splits, random_state=self.seed, shuffle=True)
             kf.get_n_splits(self.X_)
             cv_err = []
-            for train_index, validate_index in kf.split(self.X_):
-                X_tr, X_val = self.X_[train_index], self.X_[validate_index]
-                y_tr, y_val = self.y_[train_index], self.y_[validate_index]
-                Kernel_def_= getattr(kernels, self.kernel)(length_scale=sigma_)
-                K_ = Kernel_def_(X_tr, X_val)
-                # If the distances are very high/low, zero-densities must be prevented:
-                K_ = np.nan_to_num(K_)
-                psum_ = K_.sum(axis=0).T # Cumulate denominator of the Nadaraya-Watson estimator
-                psum_ = np.nan_to_num(psum_)
-                y_pred_ = (np.dot(y_tr.T, K_) / psum_)
-                y_pred_ = np.nan_to_num(y_pred_)
-                cv_err.append(MSE(y_val, y_pred_.T))
-            return np.mean(cv_err, axis=0) ## Mean error over the k splits                        
+            # Zero-densities are possible with very high/low distances; scoped to
+            # this block so it doesn't silence unrelated NumPy warnings for the
+            # rest of the process (np.seterr used to do exactly that, permanently).
+            with np.errstate(divide='ignore', invalid='ignore'):
+                for train_index, validate_index in kf.split(self.X_):
+                    X_tr, X_val = self.X_[train_index], self.X_[validate_index]
+                    y_tr, y_val = self.y_[train_index], self.y_[validate_index]
+                    Kernel_def_= getattr(kernels, self.kernel)(length_scale=sigma_)
+                    K_ = Kernel_def_(X_tr, X_val)
+                    K_ = np.nan_to_num(K_)
+                    psum_ = K_.sum(axis=0).T # Cumulate denominator of the Nadaraya-Watson estimator
+                    psum_ = np.nan_to_num(psum_)
+                    y_pred_ = (np.dot(y_tr.T, K_) / psum_)
+                    y_pred_ = np.nan_to_num(y_pred_)
+                    cv_err.append(MSE(y_val, y_pred_.T))
+            return np.mean(cv_err, axis=0) ## Mean error over the k splits
         
         def optimization(x0_):
             '''A function to find the optimal values of sigma (i.e. the values 
@@ -200,7 +200,14 @@ class GRNN(BaseEstimator, RegressorMixin):
                 opt_cv_error = np.inf
                 pass
             return [opt_sigma, opt_cv_error]
-        
+
+        def pick_best(optima):
+            '''Given a list of [sigma, cv_error] optimization results, return the
+            sigma and cv_error of the run with the lowest cv_error.'''
+            cost_values = list(map(itemgetter(1), optima))
+            best_sigma = optima[np.argmin(cost_values)][0]
+            return best_sigma, np.min(cost_values)
+
         def calibrate_sigma(x0):
             '''A function to find the values of sigma minimizing the CV-MSE, given
             a starting guess x0 (either user-defined or measured with warm start).
@@ -217,11 +224,10 @@ class GRNN(BaseEstimator, RegressorMixin):
                 optima = [optimization(x0)]            
             else:
                 raise ValueError('n_restarts_optimizer must be a positive int!')
-            
+
             # Select sigma from the run minimizing cost
-            cost_values = list(map(itemgetter(1), optima))
-            self.cv_error = np.min(cost_values)
-            return optima[np.argmin(cost_values)][0]
+            best_sigma, self.cv_error = pick_best(optima)
+            return best_sigma
 
 
         if self.calibration == 'warm_start':
@@ -229,8 +235,7 @@ class GRNN(BaseEstimator, RegressorMixin):
             bnds_ = (self.bnds,)
             x0 = np.asarray(sigma0)
             optima = [optimization(x0)]
-            cost_values = list(map(itemgetter(1), optima))
-            warm_sigma = optima[np.argmin(cost_values)][0]
+            warm_sigma, _ = pick_best(optima)
             print('Warm start concluded. The optimum isotropic sigma is ' + str(warm_sigma))
             x0 = np.full(len(self.X_[0]), np.around(warm_sigma, decimals=3))
             bnds_ = (self.bnds,)*len(self.X_[0])
@@ -274,4 +279,5 @@ class GRNN(BaseEstimator, RegressorMixin):
         K = np.nan_to_num(K)
         psum = K.sum(axis=0).T # Cumulate denominator of the Nadaraya-Watson estimator
         psum = np.nan_to_num(psum)
-        return np.nan_to_num((np.dot(self.y_.T, K) / psum))
+        with np.errstate(divide='ignore', invalid='ignore'):
+            return np.nan_to_num(np.dot(self.y_.T, K) / psum)

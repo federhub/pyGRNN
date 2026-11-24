@@ -22,7 +22,7 @@ def diabetes_split():
 
 
 def test_predict_before_fit_raises(diabetes_split):
-    X_train, X_test, _, _ = diabetes_split
+    _, X_test, _, _ = diabetes_split
     with pytest.raises(NotFittedError):
         GRNN().predict(X_test)
 
@@ -37,7 +37,7 @@ def test_isotropic_fit_predict_shapes_and_accuracy(diabetes_split):
 
 
 def test_anisotropic_gradient_search_fits_one_sigma_per_feature(diabetes_split):
-    X_train, X_test, y_train, y_test = diabetes_split
+    X_train, X_test, y_train, _ = diabetes_split
     model = GRNN(calibration="gradient_search").fit(X_train, y_train)
     assert model.sigma.shape == (X_train.shape[1],)
     y_pred = model.predict(X_test)
@@ -45,7 +45,7 @@ def test_anisotropic_gradient_search_fits_one_sigma_per_feature(diabetes_split):
 
 
 def test_warm_start_default_calibration_runs(diabetes_split):
-    X_train, X_test, y_train, y_test = diabetes_split
+    X_train, X_test, y_train, _ = diabetes_split
     model = GRNN(n_splits=3).fit(X_train, y_train)
     y_pred = model.predict(X_test)
     assert np.isfinite(y_pred).all()
