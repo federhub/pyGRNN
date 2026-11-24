@@ -11,7 +11,7 @@ description = "Python implementation of General Regression Neural Network (Nadar
 readme = "README.md"
 license = "MIT"
 authors = [
-    { name = "Federico Amato", email = "federico.amato@unil.ch" },
+    { name = "Federico Amato" },
 ]
 requires-python = ">=3.10"
 keywords = [
