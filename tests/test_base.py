@@ -10,14 +10,14 @@ def test_list_combs_includes_empty_and_full_set():
     result = list_combs((1, 2))
     assert () in result
     assert (1, 2) in result
-    assert len(result) == 2 ** 2  # every subset, including the empty one
+    assert len(result) == 2**2  # every subset, including the empty one
 
 
 def test_combs_excludes_the_empty_set():
     result = list(combs((1, 2)))
     assert () not in result
     assert (1, 2) in result
-    assert len(result) == 2 ** 2 - 1
+    assert len(result) == 2**2 - 1
 
 
 def test_recursive_combination_excluder_keeps_only_supersets_of_excludes():
